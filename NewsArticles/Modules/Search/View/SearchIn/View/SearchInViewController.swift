@@ -40,6 +40,10 @@ class SearchInViewController: UIViewController {
         setUpNavigationBar()
 
     }
+    
+    deinit {
+           
+       }
 }
 
     //MARK: Set up NavigationBar

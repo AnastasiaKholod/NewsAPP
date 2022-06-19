@@ -36,11 +36,13 @@ final class ArticlesViewController: UIViewController {
         
         navigationItem.titleView = UIImageView(image: UIImage(named: "logo"))
         
-        let api = TopHeadlinesService()
-        api.getTopHeadlines { error in
-            print(error)
-        } success: { [weak self] response in
-            self?.dataSource = response.articles
+        ServiceLayer.request(router: Router.getTopHeadlines) { [weak self] (result: Result<ArticlesResponse, Error>) in
+            switch result {
+            case .success (let result):
+                self?.dataSource = result.articles
+            case .failure:
+                print(result)
+            }
         }
     }
 }

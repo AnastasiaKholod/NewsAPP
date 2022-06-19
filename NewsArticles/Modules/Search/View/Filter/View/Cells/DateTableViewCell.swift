@@ -47,7 +47,6 @@ final class DateTableViewCell: UITableViewCell, Reusable {
         return obj
     }()
     
-        // MARK: - Initializators
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setup()

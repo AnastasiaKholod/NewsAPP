@@ -15,7 +15,16 @@ struct Filters {
 
 class FilterViewController: UIViewController {
     var mainView = FilterView()
-    var filters = Filters()
+    var filters: Filters
+    
+    init(filters: Filters = Filters()) {
+        self.filters = filters
+        super.init(nibName:nil, bundle:nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
         // MARK: - Functions
     override func loadView() {
@@ -38,10 +47,9 @@ class FilterViewController: UIViewController {
         mainView.applyButton.addTarget(self, action: #selector(applyTapped), for: .touchUpInside)
     }
     
-        //    override func viewWillDisappear(_ animated: Bool) {
-        //      let presenter =  presentingViewController as? SearchViewController
-        //        presenter?.filters = filters
-        //    }
+    deinit {
+        print("\(type(of: self)) deinited")
+    }
 }
 
     //MARK: Set up NavigationBar
@@ -88,7 +96,6 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
             cell.titleLabel.text = "From"
             cell.pickedDateChanged = { [weak self] pickedDate in
                     //convert date into ISO
-                
                 let date = pickedDate
                 let formatter = ISO8601DateFormatter()
                 formatter.formatOptions.insert(.withFractionalSeconds)
@@ -117,7 +124,6 @@ extension FilterViewController: UITableViewDelegate, UITableViewDataSource {
             let cell: SearchInTableViewCell = tableView.dequeueReusableCell(for: indexPath)
             return cell
         }
-        
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -133,9 +139,7 @@ extension FilterViewController {
     @objc private func applyTapped() {
         let presenter =  navigationController?.viewControllers[0] as? SearchViewController
         presenter?.filters = filters
+        presenter?.getSearchResults(text: presenter?.currentSearchValue ?? "")
         navigationController?.popToRootViewController(animated: true)
-        presenter?.getSearchResults(text: presenter?.currentSearchValue ?? "") { [weak presenter] articles in
-            presenter?.articles = articles.articles
-        }
     }
 }

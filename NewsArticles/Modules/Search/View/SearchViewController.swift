@@ -16,9 +16,7 @@ class SearchViewController: UIViewController {
     var mainView = SearchView()
     var currentSearchValue: String? {
         didSet {
-            self.getSearchResults(text: self.currentSearchValue ?? "") { [weak self] articles in
-                self?.articles = articles.articles
-            }
+            getSearchResults(text: self.currentSearchValue ?? "")
         }
     }
     var state: SearchViewControllerState = .showingSearchResults
@@ -77,22 +75,25 @@ class SearchViewController: UIViewController {
         mainView.searchTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
     }
     
-    func getSearchResults(text: String, completion: @escaping (ArticlesResponse)->()) -> () {
+    deinit {
+        print("\(type(of: self)) deinited")
+    }
+    
+    func getSearchResults(text: String) -> () {
         NewsUserDefaults.saveSearchValue(newSearch: text)
         
-        var params = [String:String]()
-        params["q"] = currentSearchValue
+        var params = [URLQueryItem]()
+        params.append(URLQueryItem(name: "q", value: currentSearchValue))
+        params.append(URLQueryItem(name: "from", value: filters?.from))
+        params.append(URLQueryItem(name: "to", value: filters?.to))
         
-        params["from"] = filters?.from
-        params["to"] = filters?.to
-        
-        let api = TopHeadlinesService()
-        
-        api.getSearchResults(params) { error in
-            print(error)
-        } success: { [weak self] response in
-            self?.articles = response.articles
-            self?.mainView.titleLabel.text = "\(response.totalArticles) news"
+        ServiceLayer.request(router: .getSearchResults, params: params) { [weak self] (result: Result<ArticlesResponse, Error>) in
+            switch result {
+            case .success (let result):
+                self?.articles = result.articles
+                self?.mainView.titleLabel.text = "\(result.totalArticles) news"            case .failure:
+                print(result)
+            }
         }
     }
 }
@@ -127,9 +128,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
             let searchText = NewsUserDefaults.searchValues()[indexPath.row]
             mainView.searchTextField.text = "\(searchText)"
             currentSearchValue = searchText
-            getSearchResults(text: searchText) { [weak self] articles in
-                self?.articles = articles.articles
-            }
+            getSearchResults(text: searchText)
         case .showingSearchResults:
             guard let url = URL(string: articles?[indexPath.row].source.url ?? "https://google.com") else { return }
             

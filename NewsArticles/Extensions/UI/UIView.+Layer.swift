@@ -37,6 +37,7 @@ extension UIView {
         layer.shadowOffset = offset
         layer.shadowColor = color.cgColor
     }
+    
     open func addShadow() {
         self.layer.masksToBounds = false
         self.layer.shadowOpacity = 0.08
